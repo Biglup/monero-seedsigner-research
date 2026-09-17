@@ -751,6 +751,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "xmr-signer-cli"
+version = "0.1.0"
+dependencies = [
+ "curve25519-dalek",
+ "libmonero-signer",
+ "monero-wallet",
+ "rand_core",
+ "zeroize",
+]
+
+[[package]]
 name = "zerocopy"
 version = "0.8.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"

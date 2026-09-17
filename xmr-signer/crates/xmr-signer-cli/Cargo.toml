@@ -1,0 +1,20 @@
+[package]
+name = "xmr-signer-cli"
+description = "Command-line front end for libmonero-signer: wallet2 cold-signing blobs in, key images or signed tx out"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "xmr-signer"
+path = "src/main.rs"
+
+[dependencies]
+libmonero-signer = { path = "../libmonero-signer" }
+monero-wallet.workspace = true
+curve25519-dalek.workspace = true
+zeroize.workspace = true
+rand_core = { version = "0.6", features = ["getrandom"] }
