@@ -1,6 +1,6 @@
 # Monero SeedSigner research spike: report
 
-Status: stage 1 in progress. Sections marked "pending" are not yet measured.
+Status: stage 1 complete (numbers, fixtures, signer). Stage 2 (camera round trip, SeedSigner UI, video) not started.
 
 ## 1. Summary
 
