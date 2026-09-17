@@ -1,0 +1,8 @@
+=== spike-bench on-device run, snapshot 50 ===
+Linux raspberrypi 6.18.50+rpt-rpi-v6 #1 Raspbian 1:6.18.50-1+rpt1 (2026-09-11) armv6l GNU/Linux
+model name	: ARMv6-compatible processor rev 7 (v6l)
+Hardware	: BCM2835
+Revision	: 900093
+Model		: Raspberry Pi Zero Rev 1.3
+MemTotal:         437132 kB
+---

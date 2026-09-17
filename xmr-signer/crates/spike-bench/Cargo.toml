@@ -1,0 +1,17 @@
+[package]
+name = "spike-bench"
+description = "Benchmark harness: full cold-signing pipeline over the committed fixtures, per-phase timing and peak RSS"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+libmonero-signer = { path = "../libmonero-signer" }
+monero-wallet.workspace = true
+curve25519-dalek.workspace = true
+zeroize.workspace = true
+libc.workspace = true
+rand_core = { version = "0.6", features = ["getrandom"] }

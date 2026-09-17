@@ -86,3 +86,32 @@ After the setup reboot: `ssh pi@10.42.0.1` (or `pi@raspberrypi.local`).
 The card is measurement infrastructure only; the SeedSigner image never
 carries any of this.
 
+
+## Running spike-bench on the Pi
+
+`dist/spike-bench-armv6` runs the whole pipeline over the committed fixtures
+(one directory per wallet snapshot: `outputs.bin`, `unsigned_2in.bin`,
+`unsigned_16in.bin`), 20 measured iterations per phase after one warmup, and
+prints per-phase min / median / mean / max in microseconds, payload sizes,
+animated-QR frame counts at 30, 120 and 150 bytes per fragment, peak RSS and a
+machine-readable `RESULT` line. Rebuild with
+`scripts/build-armv6.sh spike-bench` (the emulation smoke test needs the
+fixtures mounted, so it is skipped for this binary).
+
+The seed of the stagenet test wallet is needed to decrypt the fixtures. It is
+not in the repository; ask the author, or reproduce the fixtures with your own
+stagenet wallet (scripts/fanout.py, scripts/snapshot_txs.py). Copy binary and
+fixtures to RAM-backed storage on the Pi so nothing touches the card:
+
+```
+ssh pi@<host> 'mkdir -p /dev/shm/fixtures'
+scp dist/spike-bench-armv6 pi@<host>:/dev/shm/
+scp -r fixtures/snap50 fixtures/snap200 fixtures/snap500 pi@<host>:/dev/shm/fixtures/
+ssh pi@<host>
+cd /dev/shm && chmod +x spike-bench-armv6
+XMR_SEED='word1 ... word25' ./spike-bench-armv6 fixtures --iters 20
+```
+
+The run takes a few minutes per snapshot (the 16-input signing alone is about
+10 s per iteration). Raw on-device outputs are committed as
+`dist/pi-spike-bench-*.txt`.

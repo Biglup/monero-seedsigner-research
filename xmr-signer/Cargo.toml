@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/xmr-gate", "crates/xmr-keys", "crates/libmonero-signer", "crates/xmr-signer-cli"]
+members = ["crates/xmr-gate", "crates/xmr-keys", "crates/libmonero-signer", "crates/xmr-signer-cli", "crates/spike-bench"]
 
 [workspace.package]
 version = "0.1.0"

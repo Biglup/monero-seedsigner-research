@@ -8,7 +8,49 @@ Pending.
 
 ## 2. Measurements
 
-Pending (see SPEC.md section 5 for the table layout).
+All numbers from the Raspberry Pi Zero Rev 1.3 (BCM2835, ARMv6, 437132 kB MemTotal,
+kernel 6.18.50+rpt-rpi-v6), static `arm-unknown-linux-musleabihf` release build of
+spike-bench, 20 measured iterations after one warmup. Raw outputs in
+`xmr-signer/dist/pi-spike-bench-*.txt`. QR frames are UR fountain sequence lengths
+(minimum frames to display) at the SeedSigner shell's default 30 bytes per fragment;
+the value at 120 bytes (SeedSigner "high" density) is in parentheses. Feather uses
+150 bytes per fragment when it displays.
+
+| Wallet outputs | Outputs export bytes | QR frames | Key image export bytes | QR frames | Unsigned tx bytes (2 in) | QR frames | Signed tx bytes | QR frames |
+|---|---|---|---|---|---|---|---|---|
+| 51 (0.093 XMR) | 20545 | 685 (172) | 5060 | 169 (43) | 4275 | 143 (36) | 6803 | 227 (57) |
+| ~200 | pending | | | | | | | |
+| ~500 | pending | | | | | | | |
+
+16-input transaction at 51 outputs: unsigned 21790 bytes, 727 (182) frames; signed
+34673 bytes, 1156 (289) frames.
+
+| Operation (Pi Zero 1.3) | Median ms (20 runs) | Peak RSS MB |
+|---|---|---|
+| Parse outputs export (51 outputs) | 743 | 4.0 (whole run) |
+| Compute key images (51 outputs) | 1658 | |
+| Parse unsigned tx (2 inputs) | 739 | |
+| Sign (2 inputs) | 4508 | |
+| Sign (16 inputs) | 10054 | |
+| Parse outputs export (500 outputs) | pending | |
+| Compute key images (500 outputs) | pending | |
+
+Each parse row includes one CryptoNight hash (about 700 ms of it) for the payload
+decryption; each sign row includes another for the reply encryption.
+
+| Camera round trip (stage 2) | Seconds |
+|---|---|
+| Scan outputs export (500 outputs) | pending |
+| Scan unsigned tx (16 inputs) | pending |
+| Feather scans key images | pending |
+| Feather scans signed tx | pending |
+| Power on to signed tx (2 inputs, SeedQR + passphrase) | pending |
+
+Versions: monero-oxide 731657ae3385be667abb556266369a497bc86f13; Feather 2.8.1
+(mac-arm64, GPG-verified); monero-wallet-rpc/cli 0.18.5.1; Pi image Raspberry Pi
+OS Lite 2026-09-15 (trixie, armhf), kernel 6.18.50+rpt-rpi-v6; rustc 1.96.0,
+cargo-zigbuild 0.23.0, zig 0.15.2; cuprate-cryptonight at Cuprate/cuprate
+4f8fcd1bf468f566fcd89c460d50de4adb6825bf. Cupcake/Cake: not tested.
 
 ## 3. Findings
 
