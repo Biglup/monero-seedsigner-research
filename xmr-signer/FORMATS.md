@@ -144,9 +144,8 @@ commitment mask), `multisig_kLRki` (4 x 32, zero for non-multisig).
 {spend[32], view[32]}`, `is_subaddress: bool`, `is_integrated: bool`.
 
 Feather builds this with `PendingTransaction::unsignedTxToBin` = `wallet2::dump_tx_to_str`.
-The wizard has no file button for this step, but the advanced send dialog
-(`TxConfAdvDialog`, "save to file") writes the same bytes to an `unsigned_monero_tx`
-file, which is the fixture capture path.
+The wizard's step 3 has an Export button that writes the same bytes to an
+`*_unsigned_monero_tx` file (`PageOTS_ExportUnsignedTx::exportUnsignedTx`).
 
 ## 6. What the cold side computes (`wallet2::sign_tx`)
 
@@ -204,7 +203,7 @@ a Pi Zero 1.3 are Bulletproof+ proving and CryptoNight, both measured in stage 1
 |---|---|---|
 | outputs export | wizard step 1, "Export" button | `*_outputs` |
 | key images (Feather as cold wallet) | wizard offline mode, "Export" button | `*_keyImages` |
-| unsigned tx | advanced send dialog, save to file | `unsigned_monero_tx` |
+| unsigned tx | wizard step 3, "Export" button | `*_unsigned_monero_tx` |
 | signed tx (Feather as cold wallet) | wizard sign step, "Export" button | `*signed_monero_tx` |
 
 All three wizard import steps also accept a file, so device output can be validated
