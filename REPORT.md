@@ -137,6 +137,12 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
 - Feather's coin control: "Spend" on selected coins only marks preferred inputs and
   wallet2 still uses as few as needed; "Sweep selected outputs" spends exactly the
   selected coins, which is how the 2-input and 16-input fixtures are made.
+- Cupcake (cake-tech/cupcake 7a8754a) via monero_c (mrcyjanek/monero_c 7352f1c,
+  patch `0005-UR-functions.patch`): the same four UR type strings, the same wallet2
+  strings (`export_outputs_to_str`, `parse_unsigned_tx_from_str`,
+  `sign_tx_dump_to_str`, key image export) wrapped as a bare CBOR byte string, default
+  130 bytes per fragment. By code inspection the device's payloads are compatible
+  unchanged. Not exercised against the app.
 - Frame counts: Feather emits 150-byte fragments at 80 ms; the SeedSigner shell
   displays 30-byte fragments at its default density (10 low, 120 high).
 
