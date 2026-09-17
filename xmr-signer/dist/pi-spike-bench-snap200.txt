@@ -1,0 +1,26 @@
+=== spike-bench on-device run, snapshot 200 ===
+Linux raspberrypi 6.18.50+rpt-rpi-v6 #1 Raspbian 1:6.18.50-1+rpt1 (2026-09-11) armv6l GNU/Linux
+model name	: ARMv6-compatible processor rev 7 (v6l)
+Hardware	: BCM2835
+Revision	: 900093
+Model		: Raspberry Pi Zero Rev 1.3
+MemTotal:         437132 kB
+---
+spike-bench (libmonero-signer 0.1.0)
+target: arm-unknown-linux-musleabihf
+iterations: 20 measured after 1 warmup, per phase
+fixtures: fixtures
+
+snapshot phase              min_us  median_us    mean_us     max_us
+snap200  parse_outputs      746111     746642     748294     780816
+snap200  key_images        4196711    4199493    4203277    4234736
+snap200  parse_2in          738762     739242     794754    1501068
+snap200  sign_2in          4453477    4462514    4765995    8714156
+snap200  parse_16in         743820     744288     746100     779424
+snap200  sign_16in         9991948    9999705   10006996   10034696
+
+snap200 wallet_outputs=215 outputs_export_bytes=33381 keyimage_export_bytes=20804 outputs_frames@30=1113 keyimages_frames@30=694 outputs_frames@120=279 keyimages_frames@120=174 outputs_frames@150=223 keyimages_frames@150=139
+snap200 tx_inputs=2 unsigned_tx_bytes=4120 signed_tx_bytes=6666 unsigned_frames@30=138 signed_frames@30=223 unsigned_frames@120=35 signed_frames@120=56 unsigned_frames@150=28 signed_frames@150=45
+snap200 tx_inputs=16 unsigned_tx_bytes=21635 signed_tx_bytes=34573 unsigned_frames@30=722 signed_frames@30=1153 unsigned_frames@120=181 signed_frames@120=289 unsigned_frames@150=145 signed_frames@150=231
+peak rss: 4084 kilobytes
+RESULT target=arm-unknown-linux-musleabihf iters=20 snap200.parse_outputs_median_us=746642 snap200.key_images_median_us=4199493 snap200.parse_2in_median_us=739242 snap200.sign_2in_median_us=4462514 snap200.parse_16in_median_us=744288 snap200.sign_16in_median_us=9999705 peak_rss_raw=4084 peak_rss_unit=kilobytes
