@@ -12,7 +12,33 @@ Pending (see SPEC.md section 5 for the table layout).
 
 ## 3. Findings
 
-Pending.
+Format survey (2026-09-17, before any fixtures exist), full detail in
+`xmr-signer/FORMATS.md`:
+
+- The four Keystone UR types are bare CBOR byte strings around wallet2's own
+  cold-signing blobs (magic prefix + view-key encryption + monero binary_archive).
+  There is no Keystone-specific structure to implement; the work is wallet2 format
+  compatibility.
+- Every payload is encrypted with ChaCha20 under a key that is CryptoNight v0 of the
+  view secret key, and authenticated with a Monero Schnorr signature by the view key.
+  The device must run CryptoNight once per payload; its ARMv6 cost is a stage 1
+  measurement.
+- Under today's protocol the cold side constructs the entire transaction, including
+  the Bulletproof+ range proof and all CLSAGs, from ring data supplied by the hot
+  wallet. The fee is implied by amounts, not passed. This rules out monero-oxide's
+  high-level `SignableTransaction` builder (fee-rate driven) and means building the
+  transaction from its primitives, which monero-oxide does expose.
+- Feather can save every payload to a file (outputs, key images, unsigned tx via the
+  advanced send dialog, signed tx) and import all three replies from a file, so stage 1
+  runs without a camera. Feather can also act as the cold wallet, giving reference
+  blobs for the same fixtures.
+- Feather 2.8.1 mac-arm64 release verified: GPG signature good from the FeatherWallet
+  key shipped in the Feather repository (fingerprint ending CEFBA71C), sha256
+  a35f19be74ca59bad96f7331d3ca8e4f56ec47e82c193f5fc50ddbebce017233.
+- Cupcake handles the same four UR type strings and delegates to monero_c (wallet2),
+  so unchanged compatibility is expected; verified only in stage 2.
+- Frame counts: Feather emits 150-byte fragments at 80 ms; the SeedSigner shell
+  displays 30-byte fragments at its default density (10 low, 120 high).
 
 ## 4. Decision record
 
