@@ -4,3 +4,11 @@ iterations: 20 measured after 1 warmup, per phase
 fixtures: fixtures
 
 snapshot phase              min_us  median_us    mean_us     max_us
+snap500  parse_outputs      751495     752823     774551    1151940
+snap500  key_images        8954325    8957085    9275488   15174293
+skipping snap500 2in: no fixture
+skipping snap500 16in: no fixture
+
+snap500 wallet_outputs=521 outputs_export_bytes=57296 keyimage_export_bytes=50180 outputs_frames@30=1910 keyimages_frames@30=1673 outputs_frames@120=478 keyimages_frames@120=419 outputs_frames@150=382 keyimages_frames@150=335
+peak rss: 3260 kilobytes
+RESULT target=arm-unknown-linux-musleabihf iters=20 snap500.parse_outputs_median_us=752823 snap500.key_images_median_us=8957085 peak_rss_raw=3260 peak_rss_unit=kilobytes
