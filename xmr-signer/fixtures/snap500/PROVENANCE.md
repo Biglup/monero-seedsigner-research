@@ -1,13 +1,13 @@
 # Snapshot snap500 (521 received outputs)
 
-Stagenet test wallet (see fixtures/snap50/PROVENANCE.md for the wallet and history). Outputs export taken with monero-wallet-rpc 0.18.5.1 `export_outputs {all: true}` from the view-only wallet at chain height 2209454 on 2026-09-17 07:23 UTC; this is the same wallet2 code path Feather's wizard uses (`export_outputs_to_str`), so the bytes are format-identical to a Feather export of the same wallet state.
+Stagenet test wallet (see fixtures/snap50/PROVENANCE.md for the wallet and history). Outputs export taken with monero-wallet-rpc 0.18.5.1 `export_outputs {all: true}` from the view-only wallet at chain height 2209454; this is the same wallet2 code path Feather's wizard uses (`export_outputs_to_str`), so the bytes are format-identical to a Feather export of the same wallet state.
 
 | File | Size | sha256 |
 |---|---|---|
 | outputs.bin | 57296 | 6efe617d06348debe50ba07ef037b4d942909244712e37b738fa6b3d6ddea1df |
 | keyimages.bin (xmr-signer keyimages) | 50180 | 3ef19285494ebd717a3a1a91e2c83b919560cc41fac5c26c13bd2a587e43a329 |
 
-## Unsigned and signed transaction sets (monero-wallet-rpc 0.18.5.1 view-only wallet, 2026-09-17)
+## Unsigned and signed transaction sets (monero-wallet-rpc 0.18.5.1 view-only wallet)
 
 Built with scripts/snapshot_txs.py: a transfer to subaddress 0/2 whose amount only the N largest spendable outputs of one subaddress can fund (the rest frozen for the call), ring size 16, priority 1; input count verified by parsing the set. Two earlier attempts with sweep_all produced 1-input sets and were discarded (their txids are not part of the fixtures). Signed by xmr-signer, submitted through the same wallet.
 

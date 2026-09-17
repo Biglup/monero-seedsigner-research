@@ -81,14 +81,14 @@ another for the reply encryption.
 
 Versions: monero-oxide 731657ae3385be667abb556266369a497bc86f13; Feather 2.8.1
 (mac-arm64, GPG-verified); monero-wallet-rpc/cli 0.18.5.1; Pi image Raspberry Pi
-OS Lite 2026-09-15 (trixie, armhf), kernel 6.18.50+rpt-rpi-v6; rustc 1.96.0,
+OS Lite (trixie, armhf), kernel 6.18.50+rpt-rpi-v6; rustc 1.96.0,
 cargo-zigbuild 0.23.0, zig 0.15.2; cuprate-cryptonight at Cuprate/cuprate
 4f8fcd1bf468f566fcd89c460d50de4adb6825bf. Cupcake/Cake: not tested (compatible by
 code inspection, see findings).
 
 ## 3. Findings
 
-Format survey (2026-09-17, before any fixtures exist), full detail in
+Format survey (before any fixtures existed), full detail in
 `xmr-signer/FORMATS.md`:
 
 - The four Keystone UR types are bare CBOR byte strings around wallet2's own
@@ -123,7 +123,7 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   plus change, 16 owned outputs per transaction, waiting ten blocks between rounds.
   Spent outputs still count for the view-only export, so the 50, 200 and 500
   snapshots are taken from one wallet as its history grows.
-- Signer core, first half validated (2026-09-17): `libmonero-signer` decrypts and
+- Signer core, first half validated: `libmonero-signer` decrypts and
   parses a real wallet2 outputs export (33 outputs, from monero-wallet-rpc 0.18.5.1
   on the test wallet), recovers every one-time key including subaddress outputs and
   outputs whose derivation goes through additional tx public keys, and produces key
@@ -140,7 +140,7 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   subaddress destinations; the remaining history is built with repeated payments to
   the primary address so the 500-output export is representative of a normal
   wallet, and the subaddress case is reported as the worst case.
-- Signer core, second half validated (2026-09-17): `libmonero-signer` parses a
+- Signer core, second half validated: `libmonero-signer` parses a
   wallet2 unsigned tx set (2 inputs, ring 16, RingCT type 6), recovers the spent
   one-time keys, builds the transaction from monero-oxide primitives (one-time
   output keys, view tags, ECDH amounts, Bulletproof+, CLSAGs, sorted inputs,
@@ -150,7 +150,7 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   stagenet daemon accepted the transaction into its pool (txid
   b2c80c12780a16b2a38b6f0424d3d774f6928499ddbdddef3e48e8913efcda9c). No Feather
   involvement yet; Feather fixtures come next.
-- First on-device timings (2026-09-17, release build of the `xmr-signer` CLI on the Pi
+- First on-device timings (release build of the `xmr-signer` CLI on the Pi
   Zero 1.3, single runs, development vectors from monero-wallet-rpc, not the final
   Feather fixtures): parse plus decrypt of a 51-output export (20545 bytes) 754 ms;
   key images and signatures for 51 outputs 1640 ms; parse plus decrypt of a 2-input
@@ -159,7 +159,7 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   CryptoNight hash, about 0.7 s on this CPU, so a full round trip carries four of
   them. Final numbers (20-run medians, peak RSS) come from spike-bench on the Feather
   fixtures.
-- Feather round trip, file transport (2026-09-17): Feather 2.8.1 view-only wallet
+- Feather round trip, file transport: Feather 2.8.1 view-only wallet
   exported its outputs, imported the signer's key images, built a transaction,
   exported the unsigned set, and after the signer produced the signed set Feather
   imported it and broadcast it. The transaction (1 input, ring 16, txid
@@ -184,10 +184,10 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
 
 ### Rust (monero-oxide) vs C++ (wallet2): Rust
 
-Day-one gate, 2026-09-17. monero-oxide's `monero-wallet` crate (commit
+Day-one gate. monero-oxide's `monero-wallet` crate (commit
 731657ae3385be667abb556266369a497bc86f13, default branch) cross-compiles to a
 static `arm-unknown-linux-musleabihf` binary with cargo-zigbuild (zig
-0.15.2, rustc 1.96.0 (ac68faa20 2026-05-25)) and runs on the Pi Zero 1.3 (BCM2835,
+0.15.2, rustc 1.96.0) and runs on the Pi Zero 1.3 (BCM2835,
 kernel 6.18.50+rpt-rpi-v6, 437132 kB MemTotal). The gate binary
 `xmr-signer/crates/xmr-gate` computed 5120 key images (20 passes over the 256
 `generate_key_image` vectors from monero-project/monero) with 0 mismatches,
@@ -210,7 +210,7 @@ This is measurement infrastructure, not part of the device image.
 ## 5. FCMP++ paragraph
 
 Source: seraphis-migration/monero PR #52, "wallet: complete hot-cold implementation
-for Carrot/FCMP++" (closed 2026-09-14 with the note that it will be re-submitted as
+for Carrot/FCMP++" (closed with the note that it will be re-submitted as
 smaller pieces once its dependencies merge; tracked in issue #53). Under FCMP++ the
 cold side no longer builds the whole transaction. The PR's protocol goals are a
 compact exported Carrot outputs format, a compact signed transaction format that
@@ -232,7 +232,7 @@ tests were still open in the PR when it closed, so anything beyond this is not y
 settled upstream.
 
 
-### FCMP++ cold-side cost, measured (2026-09-17)
+### FCMP++ cold-side cost, measured
 
 Under FCMP++ the cold side's per-input work is: rerandomize the spent output, open
 the input tuple, prove spend authorization and linkability (SA/L). `xmr-signer/fcmp-bench`

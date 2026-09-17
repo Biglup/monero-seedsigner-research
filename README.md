@@ -51,7 +51,7 @@ With the hot/cold design in [seraphis-migration/monero#52](https://github.com/se
 | 2 | 34 ms | 87 ms | 121 ms | 768 | 4.5 s |
 | 16 | 269 ms | 700 ms | 969 ms | 6144 | 9 to 10 s |
 
-Proposal format and encryption are not specified yet (keeping todays wrapper would add 0.7 s of CryptoNight per payload here) and the PR was closed on 2026-09-14 to be split up, so this is design intent. The hardware is fine, the current protocol is what makes it slow.
+Proposal format and encryption are not specified yet (keeping todays wrapper would add 0.7 s of CryptoNight per payload here) and the PR was closed to be split up, so this is design intent. The hardware is fine, the current protocol is what makes it slow.
 
 ## Decisions
 

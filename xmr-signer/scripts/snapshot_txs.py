@@ -91,7 +91,7 @@ def main():
         prov.append((n, len(blob), hashlib.sha256(blob).hexdigest(), len(sblob), hashlib.sha256(sblob).hexdigest(), txids[0], h, sub))
         time.sleep(5)
     with open(os.path.join(fdir, "PROVENANCE.md"), "a") as f:
-        f.write("\n## Unsigned and signed transaction sets (monero-wallet-rpc 0.18.5.1 view-only wallet, %s)\n\n" % time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()))
+        f.write("\n## Unsigned and signed transaction sets (monero-wallet-rpc 0.18.5.1 view-only wallet)\n\n")
         f.write("Built with scripts/snapshot_txs.py: sweep_all of exactly N unlocked outputs of one subaddress to subaddress 0/2, ring size 16, priority 1. Signed by xmr-signer, submitted through the same wallet.\n\n")
         f.write("| Inputs | From subaddress | Unsigned bytes | sha256 | Signed bytes | sha256 | txid | Height |\n|---|---|---|---|---|---|---|---|\n")
         for n, ub, uh, sb, sh, txid, h, sub in prov:

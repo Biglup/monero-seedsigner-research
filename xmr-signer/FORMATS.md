@@ -1,6 +1,6 @@
 # Cold-signing payload formats (what libmonero-signer must speak)
 
-Derived on 2026-09-17 from source, not docs:
+Derived from source, not docs:
 
 - Feather 2.8.1 (feather-wallet/feather 948773c, `src/wizard/offline_tx_signing/`,
   `src/qrcode/scanner/URWidget.cpp`, `QrCodeScanWidget.cpp`), which builds against
@@ -21,7 +21,7 @@ Inside any container, pair or tuple, unsigned integer elements wider than one
 byte are varints (so `vector<size_t>` and `set<uint32_t>` are varint count plus
 varint elements, while a top-level `FIELD(uint64_t)` is 8 raw bytes). A map is a
 container of pairs: varint count, then per entry varint 2, key, value. Verified
-byte by byte against a wallet2 unsigned tx set on 2026-09-17.
+byte by byte against a wallet2 unsigned tx set.
 
 ## 1. UR layer (identical for all four types)
 

@@ -1,6 +1,6 @@
 # Stage 2 notes: integrating the signer into the SeedSigner fork
 
-Survey of cardano-seedsigner and cardano-seedsigner-os, 2026-09-17. File and line
+Survey of cardano-seedsigner and cardano-seedsigner-os. File and line
 references are to those repositories at that date.
 
 ## Native code pattern

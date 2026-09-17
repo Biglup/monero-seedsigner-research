@@ -58,7 +58,7 @@ def main():
 
     with open(os.path.join(fdir, "PROVENANCE.md"), "a") as f:
         f.write("# Snapshot %s (%d received outputs)\n\n" % (label, len(outs)))
-        f.write("Stagenet test wallet (see fixtures/snap50/PROVENANCE.md for the wallet and history). Outputs export taken with monero-wallet-rpc 0.18.5.1 `export_outputs {all: true}` from the view-only wallet at chain height %d on %s; this is the same wallet2 code path Feather's wizard uses (`export_outputs_to_str`), so the bytes are format-identical to a Feather export of the same wallet state.\n\n" % (height, time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime())))
+        f.write("Stagenet test wallet (see fixtures/snap50/PROVENANCE.md for the wallet and history). Outputs export taken with monero-wallet-rpc 0.18.5.1 `export_outputs {all: true}` from the view-only wallet at chain height %d; this is the same wallet2 code path Feather's wizard uses (`export_outputs_to_str`), so the bytes are format-identical to a Feather export of the same wallet state.\n\n" % height)
         f.write("| File | Size | sha256 |\n|---|---|---|\n")
         f.write("| outputs.bin | %d | %s |\n" % (len(blob), hashlib.sha256(blob).hexdigest()))
         f.write("| keyimages.bin (xmr-signer keyimages) | %d | %s |\n" % (len(kblob), hashlib.sha256(kblob).hexdigest()))

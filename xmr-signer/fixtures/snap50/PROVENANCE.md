@@ -9,14 +9,14 @@ view-key encrypted; the view key is public in REPORT.md, spend key is not.
 
 | File | Produced by | Size | sha256 |
 |---|---|---|---|
-| outputs.bin | Feather 2.8.1 (mac-arm64), view-only wallet, Tools > Key image sync > step 1 "Export outputs" with "Export all outputs", saved 2026-09-17 13:56 local, chain height about 2209395 | 20545 | 0d5959ef21b0d65c309d568d5c563f4d2c6e89ffe199928006d9dc08b5727bb1 |
-| keyimages.bin | xmr-signer keyimages (libmonero-signer) from outputs.bin, 2026-09-17 | 5060 | 6867a7b0db680cab582aaaecb367d4e01d11ea392879d17b3c76dedf111be472 |
+| outputs.bin | Feather 2.8.1 (mac-arm64), view-only wallet, Tools > Key image sync > step 1 "Export outputs" with "Export all outputs", chain height about 2209395 | 20545 | 0d5959ef21b0d65c309d568d5c563f4d2c6e89ffe199928006d9dc08b5727bb1 |
+| keyimages.bin | xmr-signer keyimages (libmonero-signer) from outputs.bin | 5060 | 6867a7b0db680cab582aaaecb367d4e01d11ea392879d17b3c76dedf111be472 |
 
 Note: 33 of the 51 outputs come from transactions paying 15 subaddresses and
 carry 16 additional tx public keys each (about 580 bytes per output); the
 other 18 are plain (about 80 bytes per output).
 
-## Unsigned and signed transaction sets (monero-wallet-rpc 0.18.5.1 view-only wallet, 2026-09-17 06:13 UTC)
+## Unsigned and signed transaction sets (monero-wallet-rpc 0.18.5.1 view-only wallet)
 
 Built with scripts/snapshot_txs.py: sweep_all of exactly N unlocked outputs of one subaddress to subaddress 0/2, ring size 16, priority 1. Signed by xmr-signer, submitted through the same wallet.
 

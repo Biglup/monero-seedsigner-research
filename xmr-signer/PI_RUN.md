@@ -42,15 +42,15 @@ kilobytes on Linux.
 Emulation output is committed as `dist/xmr-gate-emulation-check.txt`; the
 on-device run, including the `/proc/cpuinfo` identification, as
 `dist/pi-gate-results.txt`. The Pi has no clock source, so the timestamp in
-that file is wrong; the run happened on 2026-09-17.
+that file is wrong.
 
-Toolchain: rustc 1.96.0 (ac68faa20 2026-05-25), cargo-zigbuild 0.23.0, zig 0.15.2, target arm-unknown-linux-musleabihf, release
+Toolchain: rustc 1.96.0, cargo-zigbuild 0.23.0, zig 0.15.2, target arm-unknown-linux-musleabihf, release
 profile opt-level 3 + LTO. monero-oxide commit 731657ae3385be667abb556266369a497bc86f13.
 
 ## Benchmark card setup (Pi Zero 1.3 has no network)
 
 The Pi Zero 1.3 has no wireless and no Ethernet. The benchmark card is
-Raspberry Pi OS Lite (32-bit, 2026-09-15 trixie) with the Pi's USB port in
+Raspberry Pi OS Lite (32-bit, trixie) with the Pi's USB port in
 gadget mode, so a single data cable to the development machine carries
 power and an Ethernet link. `scripts/flash-bench-card.sh` writes the image
 and applies `pi/bootfs-overlay/` to the FAT boot partition; nothing else is
@@ -119,7 +119,7 @@ The run takes a few minutes per snapshot (the 16-input signing alone is about
 10 s per iteration). Raw on-device outputs are committed as
 `dist/pi-spike-bench-*.txt`.
 
-### Results (2026-09-17)
+### Results
 
 | Snapshot | parse_outputs | key_images | parse_2in | sign_2in | parse_16in | sign_16in | peak RSS |
 |---|---|---|---|---|---|---|---|
@@ -141,5 +141,5 @@ ssh pi@<host> 'chmod +x /tmp/xmr/fcmp-bench-armv6 && /tmp/xmr/fcmp-bench-armv6 -
 ```
 
 Rebuild: `cd fcmp-bench && cargo zigbuild --release --target arm-unknown-linux-musleabihf`.
-Pi Zero 1.3 result (2026-09-17): 61 ms per input, 969 ms for 16 inputs, 384-byte
+Pi Zero 1.3 result: 61 ms per input, 969 ms for 16 inputs, 384-byte
 proof per input, peak RSS 1.1 MB; raw output in `dist/pi-fcmp-bench.txt`.
