@@ -63,21 +63,27 @@ def main():
             time.sleep(60)
             continue
         sent = 0
-        for s in sources[:need_tx]:
-            amount = (per[s]["unlocked_balance"] - reserve) // a.dests
-            if amount <= 0:
-                continue
-            try:
-                r = rpc("transfer", {"destinations": [{"address": d, "amount": amount} for d in dests], "account_index": 0, "subaddr_indices": [s], "priority": 1, "get_tx_key": False})
-                log({"ev": "tx", "txid": r["tx_hash"], "from_subaddr": s, "amount_per_output_xmr": amount / 1e12, "fee_xmr": r["fee"] / 1e12, "outputs": a.dests + 1})
-                sent += 1
-            except Exception as e:
-                log({"ev": "tx_error", "error": str(e), "from_subaddr": s})
-                if not a.subaddr_dests and "primary" not in str(e).lower() and dests[0] == addrs[0]["address"]:
-                    # the RPC may reject repeated destinations; fall back to distinct subaddresses
-                    dests = [x["address"] for x in addrs[3:3 + a.dests]]
-                    log({"ev": "fallback", "to": "subaddress destinations"})
-            time.sleep(2)
+        # several transactions per source subaddress per round: split its unlocked
+        # balance so wallet2 picks a fraction of the outputs for each transaction
+        for s in sources:
+            if sent >= need_tx:
+                break
+            k = max(1, min(need_tx - sent, per[s]["num_unspent_outputs"] // 2))
+            for _ in range(k):
+                b = rpc("get_balance", {"account_index": 0, "address_indices": [s]})
+                unlocked = b["per_subaddress"][0]["unlocked_balance"] if b.get("per_subaddress") else 0
+                remaining = k - (_)
+                amount = (unlocked // remaining - reserve) // a.dests
+                if amount <= 0:
+                    break
+                try:
+                    r = rpc("transfer", {"destinations": [{"address": d, "amount": amount} for d in dests], "account_index": 0, "subaddr_indices": [s], "priority": 1, "get_tx_key": False})
+                    log({"ev": "tx", "txid": r["tx_hash"], "from_subaddr": s, "amount_per_output_xmr": amount / 1e12, "fee_xmr": r["fee"] / 1e12, "outputs": a.dests + 1})
+                    sent += 1
+                except Exception as e:
+                    log({"ev": "tx_error", "error": str(e), "from_subaddr": s})
+                    break
+                time.sleep(2)
         time.sleep(60 if sent else 30)
 
 if __name__ == "__main__":
