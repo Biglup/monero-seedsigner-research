@@ -64,6 +64,16 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   subaddress destinations; the remaining history is built with repeated payments to
   the primary address so the 500-output export is representative of a normal
   wallet, and the subaddress case is reported as the worst case.
+- Signer core, second half validated (2026-09-17): `libmonero-signer` parses a
+  wallet2 unsigned tx set (2 inputs, ring 16, RingCT type 6), recovers the spent
+  one-time keys, builds the transaction from monero-oxide primitives (one-time
+  output keys, view tags, ECDH amounts, Bulletproof+, CLSAGs, sorted inputs,
+  tx_extra with re-encrypted payment id) and emits a signed tx set. The
+  serialized transaction is 2191 bytes, exactly the weight wallet2 predicted. The
+  view-only wallet in monero-wallet-rpc 0.18.5.1 parsed the signed set and the
+  stagenet daemon accepted the transaction into its pool (txid
+  b2c80c12780a16b2a38b6f0424d3d774f6928499ddbdddef3e48e8913efcda9c). No Feather
+  involvement yet; Feather fixtures come next.
 - Frame counts: Feather emits 150-byte fragments at 80 ms; the SeedSigner shell
   displays 30-byte fragments at its default density (10 low, 120 high).
 

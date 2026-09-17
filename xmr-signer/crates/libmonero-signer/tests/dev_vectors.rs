@@ -62,3 +62,36 @@ fn rpc_outputs_export_to_key_images() {
     println!("additional tx keys per output: min {} max {}", export.outputs.iter().map(|o| o.additional_tx_keys.len()).min().unwrap(), export.outputs.iter().map(|o| o.additional_tx_keys.len()).max().unwrap());
     let _ = per_out;
 }
+
+#[test]
+fn rpc_unsigned_txset_to_signed_txset() {
+    use libmonero_signer::sign;
+    use libmonero_signer::txset::UnsignedTxSet;
+    use monero_wallet::address::Network;
+
+    let Ok(seed) = std::env::var("XMR_TEST_SEED") else { return };
+    let dir = vectors_dir();
+    let Ok(blob) = std::fs::read(dir.join("unsigned-txset-1.bin")) else { return };
+    let words: Vec<&str> = seed.split_whitespace().collect();
+    let keys = AccountKeys::from_mnemonic(&words).unwrap();
+    let view = ViewKey::new(&keys.view);
+    let spend_pub = &*keys.spend * ED25519_BASEPOINT_TABLE;
+
+    let set = UnsignedTxSet::parse(&view, &spend_pub, &blob).expect("parse unsigned tx set");
+    println!("unsigned set: {} tx, transfers {}..{} ({} exported), blob {} bytes", set.txes.len(), set.transfers_offset, set.transfers_total, set.new_transfers.len(), blob.len());
+    for (i, t) in set.txes.iter().enumerate() {
+        let s = sign::summarize(Network::Stagenet, t);
+        println!("tx {}: {} inputs, ring {}, fee {} pXMR, change {} pXMR, payments {:?}, extra {} bytes, rct_config {:?}, view_tags {}", i, s.inputs, s.ring_size, s.fee, s.change, s.payments, t.extra.len(), t.rct_config, t.use_view_tags);
+    }
+    let mut rng = rand_core::OsRng;
+    let t = std::time::Instant::now();
+    let res = sign::sign(&mut rng, &keys, Network::Stagenet, &set, sign::DEFAULT_LOOKAHEAD).expect("sign");
+    println!("signed in {} ms, blob {} bytes, tx hash {}", t.elapsed().as_millis(), res.blob.len(), hex::encode(res.txs[0].tx.hash()));
+    println!("tx serialized {} bytes, key images {:?}", res.txs[0].tx.serialize().len(), res.txs[0].key_images.iter().map(hex::encode).collect::<Vec<_>>());
+    std::fs::write(dir.join("signed-txset-1.bin"), &res.blob).unwrap();
+
+    // our own blob must decrypt and start with the expected structure
+    let plain = crypt::decrypt(&view, &res.blob[sign::MAGIC.len()..]).unwrap();
+    assert_eq!(plain[0], 0);
+    assert_eq!(plain[1], set.txes.len() as u8);
+}

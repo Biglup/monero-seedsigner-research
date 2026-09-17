@@ -16,8 +16,12 @@ varint. "binary_archive" is monero's `serialization/binary_archive.h` format:
 `FIELD(x)` of a fixed-size POD is the raw bytes, `FIELD(u64)` is 8 raw bytes,
 `VARINT_FIELD` is a varint, `bool` is one byte, vectors and strings are varint
 count followed by elements, `std::pair` and `std::tuple` are written as an array
-(varint element count, then elements; unsigned integer elements wider than one
-byte are varints), `VERSION_FIELD(n)` is a leading varint.
+(varint element count, then elements), `VERSION_FIELD(n)` is a leading varint.
+Inside any container, pair or tuple, unsigned integer elements wider than one
+byte are varints (so `vector<size_t>` and `set<uint32_t>` are varint count plus
+varint elements, while a top-level `FIELD(uint64_t)` is 8 raw bytes). A map is a
+container of pairs: varint count, then per entry varint 2, key, value. Verified
+byte by byte against a wallet2 unsigned tx set on 2026-09-17.
 
 ## 1. UR layer (identical for all four types)
 
@@ -121,14 +125,14 @@ full outputs export, so the cold side can refresh key images at the same time).
 | sources | vector<tx_source_entry> |
 | change_dts | tx_destination_entry |
 | splitted_dsts | vector<tx_destination_entry> (includes change) |
-| selected_transfers | vector<varint> |
+| selected_transfers | vector<varint> (varint count, varint elements) |
 | extra | vector<u8> (raw tx_extra bytes) |
 | unlock_time | u64 raw (must be 0) |
 | use_rct (construction_flags) | 1 byte: bit0 use_rct, bit1 use_view_tags |
 | rct_config | VERSION_FIELD(0), varint range_proof_type, varint bp_version |
 | dests | vector<tx_destination_entry> (excludes change) |
 | subaddr_account | u32 raw |
-| subaddr_indices | set<u32> (varint count, elements) |
+| subaddr_indices | set<u32> (varint count, varint elements) |
 
 `tx_source_entry`: `outputs: vector<pair<u64 global_index, ctkey{dest[32], mask[32]}>>`
 (the ring, real member included, sorted by global index), `real_output: u64` (index into

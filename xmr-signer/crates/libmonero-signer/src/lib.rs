@@ -12,6 +12,8 @@ pub mod archive;
 pub mod crypt;
 pub mod keyimage;
 pub mod outputs;
+pub mod sign;
+pub mod txset;
 
 pub use xmr_keys::AccountKeys;
 

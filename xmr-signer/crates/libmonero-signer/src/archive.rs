@@ -14,6 +14,10 @@ impl<'a> Reader<'a> {
         Reader { data, pos: 0 }
     }
 
+    pub fn position(&self) -> usize {
+        self.pos
+    }
+
     pub fn remaining(&self) -> usize {
         self.data.len() - self.pos
     }
