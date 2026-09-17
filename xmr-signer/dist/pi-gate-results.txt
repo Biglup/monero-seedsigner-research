@@ -1,0 +1,28 @@
++ date -u +%Y-%m-%dT%H:%M:%SZ
++ echo === xmr-gate on-device run 2026-09-15T00:34:16Z ===
+=== xmr-gate on-device run 2026-09-15T00:34:16Z ===
++ uname -a
+Linux raspberrypi 6.18.50+rpt-rpi-v6 #1 Raspbian 1:6.18.50-1+rpt1 (2026-09-11) armv6l GNU/Linux
++ grep -E model name|Hardware|Revision|Model /proc/cpuinfo
+model name	: ARMv6-compatible processor rev 7 (v6l)
+Hardware	: BCM2835
+Revision	: 900093
+Model		: Raspberry Pi Zero Rev 1.3
++ grep MemTotal /proc/meminfo
+MemTotal:         437132 kB
++ echo ---
+---
++ /tmp/xmr-gate-armv6 20
+xmr-gate (monero-oxide key image gate)
+target: arm-unknown-linux-musleabihf
+vectors: 256 (monero-project/monero tests/crypto/tests.txt, generate_key_image)
+iterations over the vector set: 20
+wallet crate check: stagenet address from vector 0 = 5AVCN9rPPWaQMpPVVFDXRwFZz5aWQPMn4CwHcC7ESHyQbwWxvgX9GjkQMpPVVFDXRwFZz5aWQPMn4CwHcC7ESHyQQUxyYag
+
+key images computed: 5120  correct: 5120  wrong: 0
+per key image us: min 3870  median 3891  max 34150
+total ms: 25207
+peak rss: 1488 kilobytes
+RESULT target=arm-unknown-linux-musleabihf vectors=256 iters=20 ok=5120 bad=0 ki_min_us=3870 ki_median_us=3891 ki_max_us=34150 total_ms=25207 peak_rss_raw=1488 peak_rss_unit=kilobytes
++ echo exit=0
+exit=0

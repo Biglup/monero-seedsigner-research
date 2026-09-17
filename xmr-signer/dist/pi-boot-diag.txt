@@ -1,0 +1,18 @@
+=== boot diagnostics 2026-09-15T00:36:13Z ===
+udc: 20980000.usb
+usb_f_ecm              12288  1
+g_ether                12288  0
+usb_f_rndis            28672  2 g_ether
+u_ether                20480  3 usb_f_ecm,g_ether,usb_f_rndis
+libcomposite           65536  4 usb_f_ecm,u_ether,g_ether,usb_f_rndis
+dwc2                  176128  0
+roles                  16384  1 dwc2
+usb0:ethernet:connected:usb0
+lo:loopback:connected (externally):lo
+usb0:4dab958c-b697-371b-8130-fdefa9c6f529:802-3-ethernet:usb0
+lo:4d00ccad-38fa-40e5-a02d-df3d8c044cac:loopback:lo
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+usb0             UP             10.42.0.1/24 fe80::88cf:d2ff:fea2:abbc/64 
+active
+active
+active

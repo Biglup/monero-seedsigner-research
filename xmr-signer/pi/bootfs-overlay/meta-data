@@ -1,0 +1,4 @@
+# cloud-init NoCloud metadata. Bumping instance_id forces first-boot modules
+# (users, write_files, runcmd) to run again on the next boot.
+dsmode: local
+instance_id: rpios-image-xmr-3

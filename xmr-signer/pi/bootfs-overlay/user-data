@@ -1,0 +1,113 @@
+#cloud-config
+# Benchmark card for the Monero SeedSigner spike. Raspberry Pi OS Lite (trixie,
+# 32-bit) first-boot configuration, consumed by cloud-init from the FAT boot
+# partition. This card is measurement infrastructure only; the signer image
+# never carries any of this.
+hostname: raspberrypi
+manage_etc_hosts: true
+
+users:
+- name: pi
+  gecos: Pi
+  groups: [adm, sudo, video, plugdev, netdev]
+  shell: /bin/bash
+  lock_passwd: false
+  passwd: $6$g9FaR2l/nNFLlWY1$Ddk6F3hvY2xfKrV6.lbChGOh.1ooQ1RmZ2w86wB5NAdYcN7s6KuuvoANapw1g4t2qEAjV1Z.qU9IlGv7kOCVQ/
+  sudo: ALL=(ALL) NOPASSWD:ALL
+  ssh_authorized_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIADWiZWPIHd3x1EXEhO3CFwYJGm92pxJsUcjlpDlGXdk angel.castillob@protonmail.com
+
+ssh_pwauth: true
+
+write_files:
+# USB gadget ethernet (usb0). Shared mode: the Pi runs DHCP on the link and
+# hands the host 10.42.0.x, the Pi itself is 10.42.0.1. Also reachable as
+# raspberrypi.local via avahi.
+- path: /etc/NetworkManager/system-connections/usb0.nmconnection
+  permissions: '0600'
+  owner: root:root
+  content: |
+    [connection]
+    id=usb0
+    type=ethernet
+    interface-name=usb0
+    autoconnect=true
+    autoconnect-priority=100
+
+    [ipv4]
+    method=shared
+
+    [ipv6]
+    method=link-local
+- path: /etc/NetworkManager/conf.d/10-usb0-managed.conf
+  permissions: '0644'
+  owner: root:root
+  content: |
+    # NetworkManager ships a udev rule that leaves USB gadget interfaces
+    # unmanaged. The benchmark link must be managed so the usb0 profile
+    # (shared mode, DHCP server) activates.
+    [device-usb0]
+    match-device=interface-name:usb0
+    managed=1
+- path: /etc/udev/rules.d/86-usb0-nm-managed.rules
+  permissions: '0644'
+  owner: root:root
+  content: |
+    # Runs after NetworkManager's 85-nm-unmanaged.rules and re-enables management of the gadget.
+    ENV{DEVTYPE}=="gadget", ENV{NM_UNMANAGED}="0"
+- path: /usr/local/sbin/xmr-bench-autorun.sh
+  permissions: '0755'
+  owner: root:root
+  content: |
+    #!/bin/sh
+    # Runs xmr-gate at boot and writes results plus USB gadget diagnostics to
+    # the FAT boot partition so they can be read on any computer.
+    B=/boot/firmware
+    OUT=$B/xmr-gate-result.txt
+    # Fallback: make sure the gadget link is managed and up before anything else.
+    for i in 1 2 3 4 5 6; do [ -e /sys/class/net/usb0 ] && break; sleep 5; done
+    nmcli device set usb0 managed yes 2>/dev/null || true
+    nmcli connection up usb0 2>/dev/null || true
+    sleep 5
+    {
+      echo "=== xmr-gate autorun $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
+      uname -a
+      grep -E "Model|Hardware|Revision" /proc/cpuinfo
+      grep MemTotal /proc/meminfo
+      echo "--- cmdline ---"; cat /proc/cmdline
+      echo "--- gadget diagnostics ---"
+      echo "udc: $(ls /sys/class/udc 2>/dev/null)"
+      lsmod | grep -E "dwc2|g_ether|usb_f|libcomposite" || echo "no gadget modules loaded"
+      dmesg | grep -iE "dwc2|g_ether|gadget|usb0" | tail -20
+      nmcli -t device 2>/dev/null; nmcli -t connection 2>/dev/null
+      ip -br addr 2>/dev/null
+      echo "--- cloud-init ---"; cloud-init status 2>/dev/null; tail -5 /var/log/cloud-init.log 2>/dev/null
+      echo "--- gate ---"
+      chmod +x $B/xmr-gate-armv6 2>/dev/null || cp $B/xmr-gate-armv6 /tmp/xmr-gate-armv6
+      if [ -x $B/xmr-gate-armv6 ]; then $B/xmr-gate-armv6 20; else chmod +x /tmp/xmr-gate-armv6 && /tmp/xmr-gate-armv6 20; fi
+      echo "exit=$?"
+    } >"$OUT" 2>&1
+    sync
+- path: /etc/systemd/system/xmr-bench-autorun.service
+  permissions: '0644'
+  owner: root:root
+  content: |
+    [Unit]
+    Description=xmr-gate benchmark autorun (writes /boot/firmware/xmr-gate-result.txt)
+    After=network-online.target cloud-final.service
+    Wants=network-online.target
+
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/local/sbin/xmr-bench-autorun.sh
+
+    [Install]
+    WantedBy=multi-user.target
+
+runcmd:
+- [systemctl, enable, --now, ssh]
+- [nmcli, connection, reload]
+- [sh, -c, 'nmcli device set usb0 managed yes || true']
+- [sh, -c, 'nmcli connection up usb0 || true']
+- [systemctl, daemon-reload]
+- [systemctl, enable, --now, xmr-bench-autorun.service]
