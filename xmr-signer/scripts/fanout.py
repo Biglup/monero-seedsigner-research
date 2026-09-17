@@ -24,6 +24,7 @@ def main():
     ap.add_argument("--fee-reserve", type=float, default=0.0005, help="XMR kept back per tx for the fee")
     ap.add_argument("--min-source", type=float, default=0.0008, help="minimum unlocked XMR on a subaddress to spend from it")
     ap.add_argument("--log", default="local/logs/fanout.jsonl")
+    ap.add_argument("--subaddr-dests", action="store_true", help="pay 15 distinct subaddresses (adds 16 additional tx pubkeys per tx, bloats the outputs export) instead of the primary address 15 times")
     a = ap.parse_args()
 
     def rpc(method, params=None):
@@ -43,7 +44,7 @@ def main():
     while len(addrs) < 3 + a.dests:
         rpc("create_address", {"account_index": 0})
         addrs = rpc("get_address", {"account_index": 0})["addresses"]
-    dests = [x["address"] for x in addrs[3:3 + a.dests]]
+    dests = [x["address"] for x in addrs[3:3 + a.dests]] if a.subaddr_dests else [addrs[0]["address"]] * a.dests
     reserve = int(a.fee_reserve * 1e12)
 
     while True:
@@ -72,6 +73,10 @@ def main():
                 sent += 1
             except Exception as e:
                 log({"ev": "tx_error", "error": str(e), "from_subaddr": s})
+                if not a.subaddr_dests and "primary" not in str(e).lower() and dests[0] == addrs[0]["address"]:
+                    # the RPC may reject repeated destinations; fall back to distinct subaddresses
+                    dests = [x["address"] for x in addrs[3:3 + a.dests]]
+                    log({"ev": "fallback", "to": "subaddress destinations"})
             time.sleep(2)
         time.sleep(60 if sent else 30)
 

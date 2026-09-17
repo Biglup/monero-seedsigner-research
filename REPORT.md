@@ -47,6 +47,23 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   plus change, 16 owned outputs per transaction, waiting ten blocks between rounds.
   Spent outputs still count for the view-only export, so the 50, 200 and 500
   snapshots are taken from one wallet as its history grows.
+- Signer core, first half validated (2026-09-17): `libmonero-signer` decrypts and
+  parses a real wallet2 outputs export (33 outputs, from monero-wallet-rpc 0.18.5.1
+  on the test wallet), recovers every one-time key including subaddress outputs and
+  outputs whose derivation goes through additional tx public keys, and produces key
+  images identical to wallet2's for all 33. wallet2's own key image signatures
+  verify under the crate's one-member ring signature verifier and vice versa. The
+  crate's `xmr-keyimage` reply blob was imported unmodified by the official
+  monero-wallet-cli into a view-only wallet, whose balance then matched the full
+  wallet. CryptoNight v0 (Cuprate's pure-Rust crate) matches Monero's slow-hash
+  vectors. The crate cross-compiles for arm-unknown-linux-musleabihf.
+- Payload size depends on how outputs were received. Paying 15 subaddresses in one
+  transaction attaches 16 additional tx public keys and every exported output of
+  that transaction carries all of them: about 580 bytes per output versus about 80
+  for a plain two-output transaction. The first two fan-out transactions used
+  subaddress destinations; the remaining history is built with repeated payments to
+  the primary address so the 500-output export is representative of a normal
+  wallet, and the subaddress case is reported as the worst case.
 - Frame counts: Feather emits 150-byte fragments at 80 ms; the SeedSigner shell
   displays 30-byte fragments at its default density (10 low, 120 high).
 
