@@ -13,6 +13,7 @@ This repository holds the numbers, the code that produced them, and the fixtures
   - `crates/xmr-signer-cli`: command-line front end used for the file round trip.
   - `crates/spike-bench`: benchmark harness (per-phase timings, peak RSS, QR frames).
   - `crates/xmr-gate`: the day-one gate (monero-oxide key images on ARMv6).
+  - `fcmp-bench/`: FCMP++ spend-authorization proof cost on the device (own workspace).
   - `FORMATS.md`: byte-level specification of the four payloads, from source.
   - `PI_RUN.md`: how to reproduce every device number, and the bench card setup.
   - `fixtures/`: committed stagenet payloads with provenance notes.

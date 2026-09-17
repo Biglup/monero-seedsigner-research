@@ -1,0 +1,20 @@
+=== fcmp-bench on-device run ===
+Linux raspberrypi 6.18.50+rpt-rpi-v6 #1 Raspbian 1:6.18.50-1+rpt1 (2026-09-11) armv6l GNU/Linux
+Model		: Raspberry Pi Zero Rev 1.3
+MemTotal:         437132 kB
+---
+fcmp-bench (monero-oxide fcmp++ branch 31c26d96)
+target: arm-unknown-linux-musleabihf
+iterations: 20 measured after 1 warmup
+inputs   phase            min_us  median_us    mean_us     max_us
+1        rerandomize       16808      16872      16916      17252
+1        sal_prove         43652      43850      43828      44057
+1        sal proof bytes total: 384 (384 per input)
+2        rerandomize       33596      33718      33743      34026
+2        sal_prove         87350      87470      87518      87861
+2        sal proof bytes total: 768 (384 per input)
+16       rerandomize      268358     268715     270526     303716
+16       sal_prove        699697     700252     701240     705694
+16       sal proof bytes total: 6144 (384 per input)
+peak rss: 1124 kilobytes
+RESULT target=arm-unknown-linux-musleabihf iters=20 in1.rerandomize_median_us=16872 in1.sal_prove_median_us=43850 in2.rerandomize_median_us=33718 in2.sal_prove_median_us=87470 in16.rerandomize_median_us=268715 in16.sal_prove_median_us=700252 sal_proof_bytes_per_input=384 peak_rss_raw=1124 peak_rss_unit=kilobytes

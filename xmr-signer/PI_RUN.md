@@ -128,3 +128,18 @@ The run takes a few minutes per snapshot (the 16-input signing alone is about
 | 521 outputs | 754 ms | 8931 ms | 741 ms | 4470 ms | 745 ms | 9035 ms | 3976 kB |
 
 Medians of 20 iterations; raw files `dist/pi-spike-bench-snap{50,200,500}.txt`.
+
+## FCMP++ spend-authorization benchmark
+
+`dist/fcmp-bench-armv6` (source in `fcmp-bench/`, its own workspace because it
+pins monero-oxide's `fcmp++` branch) measures the cold side's per-input work under
+FCMP++: rerandomize, open, SA/L prove. No fixtures or seed needed.
+
+```
+scp dist/fcmp-bench-armv6 pi@<host>:/tmp/xmr/
+ssh pi@<host> 'chmod +x /tmp/xmr/fcmp-bench-armv6 && /tmp/xmr/fcmp-bench-armv6 --iters 20'
+```
+
+Rebuild: `cd fcmp-bench && cargo zigbuild --release --target arm-unknown-linux-musleabihf`.
+Pi Zero 1.3 result (2026-09-17): 61 ms per input, 969 ms for 16 inputs, 384-byte
+proof per input, peak RSS 1.1 MB; raw output in `dist/pi-fcmp-bench.txt`.

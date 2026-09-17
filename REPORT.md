@@ -197,7 +197,7 @@ needed and was not attempted.
 
 ### Pi Zero 1.3 vs Pi Zero 2 W: Pi Zero 1.3
 
-Kept. The gate ran natively on ARMv6 in the target memory budget, so there is
+Kept for the measurements. UX assessment: on today's protocol the 1.3 is feasible but slow (4.5 s per typical spend plus QR volume); under FCMP++ the measured SA/L cost makes it comfortable. Kept. The gate ran natively on ARMv6 in the target memory budget, so there is
 no reason to move to aarch64. Reconsider only if signing at 16 inputs turns
 out to exceed the budget in stage 1 step 4.
 
@@ -230,6 +230,30 @@ wallet without it cannot submit a signed set (payloads are already encrypted to
 that key). The Carrot key hierarchy tests and cold-initiated proposal integration
 tests were still open in the PR when it closed, so anything beyond this is not yet
 settled upstream.
+
+
+### FCMP++ cold-side cost, measured (2026-09-17)
+
+Under FCMP++ the cold side's per-input work is: rerandomize the spent output, open
+the input tuple, prove spend authorization and linkability (SA/L). `xmr-signer/fcmp-bench`
+measures exactly that with monero-oxide's `fcmp++` branch (commit
+31c26d96eaadbba910ffe3613ad8b4cf9c598a93, crate `monero-fcmp-plus-plus`, synthetic
+outputs as in the crate's own test), static ARMv6 build, 20 iterations on the Pi Zero
+1.3. Raw output in `xmr-signer/dist/pi-fcmp-bench.txt`.
+
+| Inputs | Rerandomize (median ms) | SA/L prove (median ms) | Total | Proof bytes | Today (CLSAG + BP+) |
+|---|---|---|---|---|---|
+| 1 | 17 | 44 | 61 ms | 384 | about 4.3 s |
+| 2 | 34 | 87 | 121 ms | 768 | 4.5 s |
+| 16 | 269 | 700 | 969 ms | 6144 | 9.0 to 10.1 s |
+
+Peak RSS 1.1 MB. The membership proof and the range proof are the hot wallet's job
+under the hot/cold PR and are not run on the device. Not included: whatever payload
+encryption the final format uses (today's wrapper costs 0.7 s of CryptoNight per
+payload on this CPU), and the not-yet-specified proposal parsing. On this evidence
+the same hardware signs a 16-input transaction about ten times faster after the fork
+and a typical 2-input one about forty times faster, with a reply of a few hundred
+bytes per input instead of a full transaction.
 
 ## 6. Links
 
