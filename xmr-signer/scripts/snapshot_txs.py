@@ -34,26 +34,49 @@ def main():
     prov = []
     for n in [int(x) for x in a.counts.split(",")]:
         rpc("refresh")
-        outs = [o for o in rpc("incoming_transfers", {"transfer_type": "all", "account_index": 0}).get("transfers", []) if not o["spent"] and o.get("unlocked") and not o.get("frozen")]
+        height = rpc("get_height")["height"]
+        # spendable = unlocked AND at least 10 confirmations (CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE);
+        # the RPC's "unlocked" flag alone is not enough
+        outs = [o for o in rpc("incoming_transfers", {"transfer_type": "all", "account_index": 0}).get("transfers", []) if not o["spent"] and o.get("unlocked") and not o.get("frozen") and o.get("block_height", 0) + 10 <= height]
         by_sub = {}
         for o in outs:
             by_sub.setdefault(o["subaddr_index"]["minor"], []).append(o)
-        sub = max(by_sub, key=lambda s: len(by_sub[s]))
-        if len(by_sub[sub]) < n:
-            print("not enough unlocked outputs on one subaddress for %d inputs (best %d on 0/%d)" % (n, len(by_sub[sub]), sub))
+        eligible = [s for s in by_sub if len(by_sub[s]) >= n]
+        if not eligible:
+            best = max(by_sub, key=lambda s: len(by_sub[s])) if by_sub else None
+            print("not enough spendable outputs on one subaddress for %d inputs (best %s)" % (n, ("%d on 0/%d" % (len(by_sub[best]), best)) if best is not None else "none"))
             sys.exit(1)
-        keep = by_sub[sub][:n]
-        freeze = by_sub[sub][n:]
+        # prefer the subaddress with the fewest surplus outputs (least freezing)
+        sub = min(eligible, key=lambda s: len(by_sub[s]))
+        ranked = sorted(by_sub[sub], key=lambda o: -o["amount"])
+        keep = ranked[:n]
+        freeze = ranked[n:]
         for o in freeze:
             rpc("freeze", {"key_image": o["key_image"]})
+        # pay (sum of the kept outputs - fee reserve): with the surplus frozen, only
+        # all N kept outputs together can fund it, so the tx must have exactly N inputs
+        total_kept = sum(o["amount"] for o in keep)
+        amount = total_kept - int(0.0003 * 1e12)
+        if amount <= 0:
+            print("kept outputs too small to pay the fee reserve (%.8f XMR on 0/%d)" % (total_kept / 1e12, sub))
+            sys.exit(1)
         try:
-            r = rpc("sweep_all", {"address": a.dest, "account_index": 0, "subaddr_indices": [sub], "priority": 1, "do_not_relay": True})
+            r = rpc("transfer", {"destinations": [{"address": a.dest, "amount": amount}], "account_index": 0, "subaddr_indices": [sub], "priority": 1, "do_not_relay": True})
         finally:
             for o in freeze:
                 rpc("thaw", {"key_image": o["key_image"]})
         blob = binascii.unhexlify(r["unsigned_txset"])
         unsigned = os.path.join(fdir, "unsigned_%din.bin" % n)
         open(unsigned, "wb").write(blob)
+        # count inputs by parsing the set with the signer's "show" (authoritative)
+        env0 = dict(os.environ, XMR_SEED_FILE=os.path.join(ROOT, "local", "stagenet-seed.txt"))
+        shown = subprocess.run([os.path.join(ROOT, "target", "release", "xmr-signer"), "show", unsigned], env=env0, capture_output=True, text=True).stderr
+        import re
+        m = re.search(r"inputs (\d+)", shown)
+        if not m or int(m.group(1)) != n:
+            print("expected %d inputs, got: %s" % (n, shown.strip().splitlines()[0] if shown.strip() else "?"))
+            os.remove(unsigned)
+            sys.exit(1)
         signed = os.path.join(fdir, "signed_%din.bin" % n)
         env = dict(os.environ, XMR_SEED_FILE=os.path.join(ROOT, "local", "stagenet-seed.txt"))
         out = subprocess.run([os.path.join(ROOT, "target", "release", "xmr-signer"), "sign", unsigned, signed], env=env, capture_output=True, text=True)
