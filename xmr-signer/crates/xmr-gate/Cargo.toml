@@ -1,0 +1,15 @@
+[package]
+name = "xmr-gate"
+description = "Day-one gate: monero-oxide key image computation on ARMv6 (Pi Zero 1.3)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+monero-wallet.workspace = true
+curve25519-dalek.workspace = true
+zeroize.workspace = true
+libc.workspace = true

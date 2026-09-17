@@ -1,0 +1,16 @@
+Emulation smoke test: xmr-gate-armv6 1 in an alpine container
+under docker --platform linux/arm/v6 (qemu user emulation).
+Timings below are qemu-emulated and therefore meaningless; only
+successful execution matters. Real numbers come from the Pi itself.
+
+xmr-gate (monero-oxide key image gate)
+target: arm-unknown-linux-musleabihf
+vectors: 256 (monero-project/monero tests/crypto/tests.txt, generate_key_image)
+iterations over the vector set: 1
+wallet crate check: stagenet address from vector 0 = 5AVCN9rPPWaQMpPVVFDXRwFZz5aWQPMn4CwHcC7ESHyQbwWxvgX9GjkQMpPVVFDXRwFZz5aWQPMn4CwHcC7ESHyQQUxyYag
+
+key images computed: 256  correct: 256  wrong: 0
+per key image us: min 1131  median 1223  max 3444
+total ms: 315
+peak rss: 11672 kilobytes
+RESULT target=arm-unknown-linux-musleabihf vectors=256 iters=1 ok=256 bad=0 ki_min_us=1131 ki_median_us=1223 ki_max_us=3444 total_ms=315 peak_rss_raw=11672 peak_rss_unit=kilobytes
