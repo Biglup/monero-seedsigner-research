@@ -44,7 +44,7 @@ on-device run, including the `/proc/cpuinfo` identification, as
 `dist/pi-gate-results.txt`. The Pi has no clock source, so the timestamp in
 that file is wrong; the run happened on 2026-09-17.
 
-Toolchain: rustc 1.96.0 (ac68faa20 2026-05-25), , zig 0.15.2, target arm-unknown-linux-musleabihf, release
+Toolchain: rustc 1.96.0 (ac68faa20 2026-05-25), cargo-zigbuild 0.23.0, zig 0.15.2, target arm-unknown-linux-musleabihf, release
 profile opt-level 3 + LTO. monero-oxide commit 731657ae3385be667abb556266369a497bc86f13.
 
 ## Benchmark card setup (Pi Zero 1.3 has no network)
