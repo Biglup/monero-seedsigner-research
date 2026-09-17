@@ -37,6 +37,16 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   a35f19be74ca59bad96f7331d3ca8e4f56ec47e82c193f5fc50ddbebce017233.
 - Cupcake handles the same four UR type strings and delegates to monero_c (wallet2),
   so unchanged compatibility is expected; verified only in stage 2.
+- The hot wallet in the Feather wizard must be view-only. A Feather wallet that
+  holds the spend key already knows every key image, so its default outputs export
+  (`all = false`, unknown key images only) is empty and the round trip is
+  meaningless. The demo and the fixtures use a Feather wallet restored from the
+  primary address and the private view key.
+- Output history is built by self-sends from monero-wallet-rpc 0.18.5.1 on the same
+  seed (`xmr-signer/scripts/fanout.py`): each transaction pays 15 own subaddresses
+  plus change, 16 owned outputs per transaction, waiting ten blocks between rounds.
+  Spent outputs still count for the view-only export, so the 50, 200 and 500
+  snapshots are taken from one wallet as its history grows.
 - Frame counts: Feather emits 150-byte fragments at 80 ms; the SeedSigner shell
   displays 30-byte fragments at its default density (10 low, 120 high).
 
