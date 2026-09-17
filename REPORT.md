@@ -169,7 +169,27 @@ This is measurement infrastructure, not part of the device image.
 
 ## 5. FCMP++ paragraph
 
-Pending.
+Source: seraphis-migration/monero PR #52, "wallet: complete hot-cold implementation
+for Carrot/FCMP++" (closed 2026-09-14 with the note that it will be re-submitted as
+smaller pieces once its dependencies merge; tracked in issue #53). Under FCMP++ the
+cold side no longer builds the whole transaction. The PR's protocol goals are a
+compact exported Carrot outputs format, a compact signed transaction format that
+carries only the spend-authorization-and-linkability proofs and key image
+associations, and deferred FCMP membership and Bulletproof+ proving to the hot
+wallet at submission time; proposals and signing are stateless, and a cold wallet
+can also initiate a proposal. For this device that means the two expensive pieces
+measured here, the range proof and the ring-dependent CLSAG over 16 hot-supplied
+ring members per input, move to the host, and the unsigned payload no longer has
+to carry ring member data at all. The round trip keeps the same shape (outputs
+export, key images, proposal, signed set) and the PR states that new hot and cold
+wallets stay compatible with old counterparts until hard fork activation, with the
+RPC interface unchanged until then. Two quirks the PR records: sender-receiver
+secrets are fetched from the cold wallet by signable transaction hash instead of
+txid, and finalizing a proposal requires the private view-incoming key, so a hot
+wallet without it cannot submit a signed set (payloads are already encrypted to
+that key). The Carrot key hierarchy tests and cold-initiated proposal integration
+tests were still open in the PR when it closed, so anything beyond this is not yet
+settled upstream.
 
 ## 6. Links
 

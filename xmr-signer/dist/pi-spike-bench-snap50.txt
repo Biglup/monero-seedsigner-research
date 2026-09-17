@@ -6,3 +6,19 @@ Revision	: 900093
 Model		: Raspberry Pi Zero Rev 1.3
 MemTotal:         437132 kB
 ---
+(the tee copy on the Pi's tmpfs was lost; the table and RESULT line below are the
+verbatim output of the 2026-09-17 run, captured over the SSH session)
+
+snapshot phase              min_us  median_us    mean_us     max_us
+snap50   parse_outputs      742882     743295     745248     778245
+snap50   key_images        1657467    1658089    1661214    1695684
+snap50   parse_2in          738844     739296     741299     774856
+snap50   sign_2in          4497995    4508426    4511443    4540394
+snap50   parse_16in         742886     743852     743849     745897
+snap50   sign_16in        10042407   10053723   10064006   10096540
+
+snap50 wallet_outputs=51 outputs_export_bytes=20545 keyimage_export_bytes=5060 outputs_frames@30=685 keyimages_frames@30=169 outputs_frames@120=172 keyimages_frames@120=43 outputs_frames@150=137 keyimages_frames@150=34
+snap50 tx_inputs=2 unsigned_tx_bytes=4275 signed_tx_bytes=6803 unsigned_frames@30=143 signed_frames@30=227 unsigned_frames@120=36 signed_frames@120=57 unsigned_frames@150=29 signed_frames@150=46
+snap50 tx_inputs=16 unsigned_tx_bytes=21790 signed_tx_bytes=34673 unsigned_frames@30=727 signed_frames@30=1156 unsigned_frames@120=182 signed_frames@120=289 unsigned_frames@150=146 signed_frames@150=232
+peak rss: 4028 kilobytes
+RESULT target=arm-unknown-linux-musleabihf iters=20 snap50.parse_outputs_median_us=743295 snap50.key_images_median_us=1658089 snap50.parse_2in_median_us=739296 snap50.sign_2in_median_us=4508426 snap50.parse_16in_median_us=743852 snap50.sign_16in_median_us=10053723 peak_rss_raw=4028 peak_rss_unit=kilobytes
