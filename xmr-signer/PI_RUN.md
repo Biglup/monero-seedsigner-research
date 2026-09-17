@@ -101,14 +101,17 @@ fixtures mounted, so it is skipped for this binary).
 The seed of the stagenet test wallet is needed to decrypt the fixtures. It is
 not in the repository; ask the author, or reproduce the fixtures with your own
 stagenet wallet (scripts/fanout.py, scripts/snapshot_txs.py). Copy binary and
-fixtures to RAM-backed storage on the Pi so nothing touches the card:
+fixtures to RAM-backed storage on the Pi so nothing touches the card. Use
+`/tmp` (tmpfs on this image), not `/dev/shm`: systemd-logind's `RemoveIPC=yes`
+deletes a user's `/dev/shm` files whenever their last SSH session ends, which
+silently discarded two earlier runs here.
 
 ```
-ssh pi@<host> 'mkdir -p /dev/shm/fixtures'
-scp dist/spike-bench-armv6 pi@<host>:/dev/shm/
-scp -r fixtures/snap50 fixtures/snap200 fixtures/snap500 pi@<host>:/dev/shm/fixtures/
+ssh pi@<host> 'mkdir -p /tmp/xmr/fixtures'
+scp dist/spike-bench-armv6 pi@<host>:/tmp/xmr/
+scp -r fixtures/snap50 fixtures/snap200 fixtures/snap500 pi@<host>:/tmp/xmr/fixtures/
 ssh pi@<host>
-cd /dev/shm && chmod +x spike-bench-armv6
+cd /tmp/xmr && chmod +x spike-bench-armv6
 XMR_SEED='word1 ... word25' ./spike-bench-armv6 fixtures --iters 20
 ```
 
