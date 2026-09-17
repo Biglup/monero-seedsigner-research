@@ -74,6 +74,15 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   stagenet daemon accepted the transaction into its pool (txid
   b2c80c12780a16b2a38b6f0424d3d774f6928499ddbdddef3e48e8913efcda9c). No Feather
   involvement yet; Feather fixtures come next.
+- First on-device timings (2026-09-17, release build of the `xmr-signer` CLI on the Pi
+  Zero 1.3, single runs, development vectors from monero-wallet-rpc, not the final
+  Feather fixtures): parse plus decrypt of a 51-output export (20545 bytes) 754 ms;
+  key images and signatures for 51 outputs 1640 ms; parse plus decrypt of a 2-input
+  unsigned set 749 ms; construct and sign 2 inputs with ring 16 (Bulletproof+ for 2
+  outputs, 2 CLSAGs, encrypted reply) 4.8 s. Each decrypt or encrypt pays one
+  CryptoNight hash, about 0.7 s on this CPU, so a full round trip carries four of
+  them. Final numbers (20-run medians, peak RSS) come from spike-bench on the Feather
+  fixtures.
 - Frame counts: Feather emits 150-byte fragments at 80 ms; the SeedSigner shell
   displays 30-byte fragments at its default density (10 low, 120 high).
 
