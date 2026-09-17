@@ -130,4 +130,6 @@ The test wallet's private view key is in the report, the fixtures are encrypted 
 
 `scripts/build-armv6.sh spike-bench` builds the ARMv6 binary with cargo-zigbuild, PI_RUN.md has the rest. The FCMP++ bench needs no fixtures or seed.
 
-MIT, Angel Castillo.
+## License
+
+This project is licensed under the MIT License, see [LICENSE](LICENSE) for details.
