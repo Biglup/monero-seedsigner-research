@@ -68,7 +68,7 @@ def main():
         for s in sources:
             if sent >= need_tx:
                 break
-            k = max(1, min(need_tx - sent, per[s]["num_unspent_outputs"] // 2))
+            k = max(1, min(need_tx - sent, per[s]["num_unspent_outputs"] // 2, per[s]["unlocked_balance"] // (3 * reserve)))
             for _ in range(k):
                 b = rpc("get_balance", {"account_index": 0, "address_indices": [s]})
                 unlocked = b["per_subaddress"][0]["unlocked_balance"] if b.get("per_subaddress") else 0

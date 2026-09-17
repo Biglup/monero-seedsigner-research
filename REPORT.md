@@ -4,7 +4,18 @@ Status: stage 1 in progress. Sections marked "pending" are not yet measured.
 
 ## 1. Summary
 
-Pending.
+A Raspberry Pi Zero 1.3 (single ARMv6 core, 512 MB, no wireless) can act as a
+Monero cold signer for an unmodified Feather Wallet 2.8.1. The signer core,
+`libmonero-signer`, is about 1500 lines of Rust on top of monero-oxide. It takes
+wallet2's own cold-signing payloads, the ones Feather's offline signing wizard wraps
+in the Keystone `xmr-*` UR types, decrypts them with the view key, computes key
+images, and constructs and signs the transaction on the device (Bulletproof+ and
+CLSAGs included), returning wallet2's signed set. Feather imported such a set from a
+file and broadcast it; the transaction was mined on stagenet. On the device, a
+2-input transaction signs in about 4.5 s and a 16-input one in about 10 s, with
+about 4 MB peak RSS; key images cost about 32 ms per output plus a fixed 0.7 s
+CryptoNight per payload. What this does not prove: the camera round trip and its
+scan times (stage 2), the SeedSigner UI integration, mainnet, FCMP++.
 
 ## 2. Measurements
 
