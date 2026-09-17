@@ -1,0 +1,16 @@
+[package]
+name = "xmr-keys"
+description = "Monero 25-word seed -> spend/view keys -> address (seed handling for the signer)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+monero-wallet.workspace = true
+curve25519-dalek.workspace = true
+zeroize.workspace = true
+sha3 = { version = "0.10", default-features = false }
+crc32fast = { version = "1", default-features = false }

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/xmr-gate"]
+members = ["crates/xmr-gate", "crates/xmr-keys"]
 
 [workspace.package]
 version = "0.1.0"
