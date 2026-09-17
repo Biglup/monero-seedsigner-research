@@ -1,32 +1,61 @@
 # Monero cold signing on a Pi Zero 1.3
 
-Feasibility spike: a SeedSigner class device (Raspberry Pi Zero 1.3, one ARMv6 core, 512 MB, no wireless, nothing persisted) as a Monero cold signer for an unmodified Feather Wallet. Stagenet only. The camera round trip and the device UI are not part of this, only the signing core and the numbers.
+Feasibility spike: a SeedSigner class device (Raspberry Pi Zero 1.3, one ARMv6 core, 512 MB, no wireless, nothing persisted) as a Monero cold signer for an unmodified Feather Wallet. Stagenet only. This covers the signing core and the numbers, not the camera round trip or the device UI.
+
+## Round trip
+
+Feather's offline signing wizard exchanges four payloads with a cold signer. They are wallet2's own cold signing blobs, encrypted to the view key, wrapped as a CBOR byte string in the Keystone `xmr-*` UR types. Nothing else is in there, the spec from Feather's source is in [xmr-signer/FORMATS.md](xmr-signer/FORMATS.md).
+
+```mermaid
+sequenceDiagram
+    participant F as Feather (view only)
+    participant D as Device (seed in RAM)
+    F->>D: xmr-output, outputs export (57 KB for 521 outputs)
+    D->>F: xmr-keyimage, key images + signatures (50 KB)
+    Note over F: knows balance, builds tx with rings
+    F->>D: xmr-txunsigned, ring members, dests, change (4 KB for 2 inputs)
+    Note over D: builds the whole tx, BP+, CLSAGs
+    D->>F: xmr-txsigned, full signed tx set (7 KB)
+    Note over F: broadcasts
+```
+
+The first two steps happen once per new batch of outputs (Feather only exports outputs whose key images it does not know), the last two on every spend.
 
 ## Signer
 
-`libmonero-signer`, about 1500 lines of Rust on [monero-oxide](https://github.com/monero-oxide/monero-oxide). It consumes and produces wallet2's cold signing payloads, the same bytes Feather's offline signing wizard sends as the Keystone `xmr-output`, `xmr-keyimage`, `xmr-txunsigned` and `xmr-txsigned` UR types. Those four types are just a CBOR byte string around wallet2's blobs, there is nothing else to them. Byte level spec from Feather's source in [xmr-signer/FORMATS.md](xmr-signer/FORMATS.md).
+`libmonero-signer`, about 1500 lines of Rust on [monero-oxide](https://github.com/monero-oxide/monero-oxide).
 
-Payloads are encrypted to the view key (ChaCha20, key = CryptoNight of the view key, Monero Schnorr signature for authentication). The device derives the keys from the 25 word seed in memory, decrypts the outputs export, recovers the one time keys (subaddresses, additional tx keys), computes and signs key images, and for the unsigned set builds the complete transaction: output keys, view tags, ECDH amounts, Bulletproof+, one CLSAG per input over the ring the hot wallet chose. On the current protocol the cold side builds all of it, the fee is implied by the amounts.
+```mermaid
+flowchart LR
+    S[25 word seed] --> K[spend + view keys]
+    K --> DEC[decrypt payload: CryptoNight, ChaCha20, Schnorr check]
+    DEC --> P[parse wallet2 binary archive]
+    P --> KI[one time keys, key images, ring sig per image]
+    P --> TX[build tx: output keys, view tags, ECDH, BP+, CLSAG per input]
+    KI --> ENC[encrypt reply]
+    TX --> ENC
+```
 
-monero-oxide's builder is fee rate driven so the tx is assembled from its primitives. What had to be written on top: wallet2 binary archive reader/writer, CryptoNight (Cuprate's pure Rust crate), the one member ring signature per key image, the Schnorr signature of the wrapper.
+On the current protocol the cold side builds the complete transaction, the fee is implied by the amounts. monero-oxide's high level builder is fee rate driven so the tx is assembled from its primitives. Written on top of monero-oxide: the binary archive reader/writer, CryptoNight (Cuprate's pure Rust crate), the one member ring signature wallet2 wants per key image, the Schnorr signature of the wrapper.
 
 ## Validation
 
-Key images for a 33 output export match wallet2's one by one, signatures verify both ways, and monero-wallet-cli imported the reply into a view only wallet with the expected balance. A signed set from a wallet-rpc view only wallet was accepted by that wallet and the daemon, 2191 bytes, the exact weight wallet2 predicted. With Feather 2.8.1 (view only wallet, file transport): export outputs, import device key images, build tx, export unsigned, import device signed set, broadcast. Mined in stagenet block 2209404, txid `8a4268bbdc24b2d82c06ca7a5db34cccaf7c96a93d4e5fd56944ef3ff18847b2`. No Feather changes.
-
-Cupcake goes through monero_c, which is wallet2 with the same four UR types, so it should work unchanged. Only checked by reading the code.
+- Key images for a 33 output export match wallet2's one by one, both signature sets verify, monero-wallet-cli imports the reply into a view only wallet with the right balance.
+- A signed set from a wallet-rpc view only wallet is accepted by that wallet and by the daemon. 2191 bytes, the weight wallet2 predicted.
+- Feather 2.8.1, file transport, full round trip as in the diagram, broadcast, mined in stagenet block 2209404 (`8a4268bbdc24b2d82c06ca7a5db34cccaf7c96a93d4e5fd56944ef3ff18847b2`). No Feather changes.
+- Cupcake uses monero_c, which is wallet2 with the same four UR types. Should work unchanged, only checked by reading the code.
 
 ## Numbers
 
-Pi Zero Rev 1.3, static `arm-unknown-linux-musleabihf` release build, medians of 20 runs after a warmup. Raw outputs in `xmr-signer/dist/`. Three stagenet snapshots, 51, 215 and 521 received outputs.
+Pi Zero Rev 1.3, static ARMv6 musl release build, medians of 20 runs. Raw outputs in `xmr-signer/dist/`. Three stagenet wallet snapshots.
 
-| Wallet outputs | Outputs export | Key image reply | Unsigned tx (2 in) | Signed set (2 in) |
+| Wallet outputs | Outputs export | Key image reply | Unsigned tx, 2 in | Signed set, 2 in |
 |---|---|---|---|---|
 | 51 | 20545 bytes | 5060 bytes | 4275 bytes | 6803 bytes |
 | 215 | 33381 bytes | 20804 bytes | 4120 bytes | 6666 bytes |
 | 521 | 57296 bytes | 50180 bytes | 4198 bytes | 6739 bytes |
 
-A 16 input tx is about 22 KB unsigned and 35 KB signed at any wallet size. The 51 output export is fat because 33 of its outputs come from txs paying 15 subaddresses each (wallet2 attaches 16 additional tx pubkeys to every one of them, about 580 bytes per output vs about 80). The other two snapshots use plain payments.
+16 inputs: about 22 KB unsigned, 35 KB signed, at any wallet size. The 51 output export is fat because 33 of those outputs came from txs paying 15 subaddresses each and wallet2 attaches 16 additional tx pubkeys to every one of them (about 580 bytes per output, vs about 80). The other snapshots use plain payments.
 
 | Operation | Median |
 |---|---|
@@ -37,25 +66,54 @@ A 16 input tx is about 22 KB unsigned and 35 KB signed at any wallet size. The 5
 
 Peak RSS about 4 MB. Key images are about 16 ms per output plus one CryptoNight for the reply, signing does not depend on wallet size.
 
-QR frames at 120 bytes per fragment (the SeedSigner shell's high density): 521 output export 478, its key image reply 419, 2 input unsigned tx 35, its signed set 56, 16 input signed set 293. The shell's default is 30 bytes per fragment, four times that, it was tuned for PSBTs.
+QR frames at 120 bytes per fragment (the SeedSigner shell's high density):
 
-Compute wise this is hardware wallet territory (Ledger's Monero app takes minutes, Trezor tens of seconds, Cupcake on a phone is instant). The protocol is the problem: a view only wallet needs the cold side's key images before it knows its balance, and the unsigned tx carries 16 ring members per input. Feather only exports outputs with unknown key images so the big sync happens once, but a routine 2 input spend is still around 90 frames each way on a 240x240 LCD at 6 fps plus two CryptoNight hashes. Works, slow.
+| Payload | Frames |
+|---|---|
+| Outputs export, 521 outputs | 478 |
+| Key image reply, 521 outputs | 419 |
+| Unsigned tx, 2 inputs | 35 |
+| Signed set, 2 inputs | 56 |
+| Signed set, 16 inputs | 293 |
+
+The shell's default density is 30 bytes per fragment, four times these counts, it was tuned for PSBTs.
+
+Compute wise this is hardware wallet territory (Ledger's Monero app takes minutes, Trezor tens of seconds, Cupcake on a phone is instant). What makes it slow is the protocol: the key image sync before the hot wallet knows its balance, and 16 ring members per input in the unsigned tx. A routine 2 input spend is still around 90 frames each way on a 240x240 LCD at 6 fps plus two CryptoNight hashes.
 
 ## FCMP++
 
-With the hot/cold design in [seraphis-migration/monero#52](https://github.com/seraphis-migration/monero/pull/52) the cold side only produces the spend authorization and linkability proof per input, membership and range proofs move to the hot wallet, and with Carrot keys the hot wallet computes key images itself so the sync round trip goes away. monero-oxide's `fcmp++` branch exposes that proof, measured on the same hardware (`xmr-signer/fcmp-bench`, synthetic outputs as in the crate's test, branch commit 31c26d96):
+With the hot/cold design in [seraphis-migration/monero#52](https://github.com/seraphis-migration/monero/pull/52) the round trip becomes two steps and the device does much less:
 
-| Inputs | Rerandomize | SA/L prove | Total | Proof bytes | Current protocol |
-|---|---|---|---|---|---|
-| 1 | 17 ms | 44 ms | 61 ms | 384 | ~4.3 s |
-| 2 | 34 ms | 87 ms | 121 ms | 768 | 4.5 s |
-| 16 | 269 ms | 700 ms | 969 ms | 6144 | 9 to 10 s |
+```mermaid
+sequenceDiagram
+    participant F as Hot wallet (Carrot view balance key)
+    participant D as Device
+    Note over F: computes key images itself, no sync step
+    F->>D: proposal, no ring data
+    Note over D: SA/L proof per input
+    D->>F: proofs + key image associations, 384 bytes per input
+    Note over F: membership proof, range proof, broadcast
+```
 
-Proposal format and encryption are not specified yet (keeping todays wrapper would add 0.7 s of CryptoNight per payload here) and the PR was closed to be split up, so this is design intent. The hardware is fine, the current protocol is what makes it slow.
+monero-oxide's `fcmp++` branch exposes the SA/L proof, so it was measured on the same hardware (`xmr-signer/fcmp-bench`, synthetic outputs as in the crate's own test, branch commit 31c26d96):
+
+| Inputs | Rerandomize | SA/L prove | Total | Current protocol |
+|---|---|---|---|---|
+| 1 | 17 ms | 44 ms | 61 ms | ~4.3 s |
+| 2 | 34 ms | 87 ms | 121 ms | 4.5 s |
+| 16 | 269 ms | 700 ms | 969 ms | 9 to 10 s |
+
+Caveats: proposal format and encryption are not specified yet (keeping todays wrapper adds 0.7 s of CryptoNight per payload on this CPU), the PR was closed to be split up, and legacy keyed wallets keep the key image sync since a legacy view key cannot compute key images. The hardware is fine, the current protocol is what makes it slow.
 
 ## Decisions
 
-Rust/monero-oxide over the wallet2 C++ path: the day one gate (monero-oxide key images on ARMv6, all 256 upstream vectors) passed, the fallback was never needed. Pi Zero 1.3 over the 2 W: the 2 W is about five times faster but has a radio. Fixtures: first snapshot outputs export and one unsigned/signed pair from Feather's wizard, the exact 2 and 16 input sets and the other snapshots from monero-wallet-rpc on a view only wallet (same wallet2 code path, identical format). Provenance next to every fixture.
+| Choice | Taken | Why |
+|---|---|---|
+| Rust on monero-oxide vs wallet2 C++ | Rust | day one gate passed: key images on ARMv6, all 256 upstream vectors, fallback never needed |
+| Pi Zero 1.3 vs Zero 2 W | 1.3 | the 2 W is about five times faster but has a radio |
+| Fixture source | Feather for the first export and one tx, monero-wallet-rpc for the rest | same wallet2 code path, identical bytes, no GUI clicking per snapshot |
+
+Provenance sits next to every fixture.
 
 ## Layout
 
