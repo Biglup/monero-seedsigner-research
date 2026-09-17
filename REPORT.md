@@ -83,6 +83,18 @@ Format survey (2026-09-17, before any fixtures exist), full detail in
   CryptoNight hash, about 0.7 s on this CPU, so a full round trip carries four of
   them. Final numbers (20-run medians, peak RSS) come from spike-bench on the Feather
   fixtures.
+- Feather round trip, file transport (2026-09-17): Feather 2.8.1 view-only wallet
+  exported its outputs, imported the signer's key images, built a transaction,
+  exported the unsigned set, and after the signer produced the signed set Feather
+  imported it and broadcast it. The transaction (1 input, ring 16, txid
+  8a4268bbdc24b2d82c06ca7a5db34cccaf7c96a93d4e5fd56944ef3ff18847b2) was mined in
+  stagenet block 2209404. No Feather change was needed.
+- Pitfall for the demo script: two unsigned sets created before the first one is
+  broadcast can share an input, and the second then fails in Feather with "double
+  spend". Create, sign and broadcast one transaction at a time.
+- Feather's coin control: "Spend" on selected coins only marks preferred inputs and
+  wallet2 still uses as few as needed; "Sweep selected outputs" spends exactly the
+  selected coins, which is how the 2-input and 16-input fixtures are made.
 - Frame counts: Feather emits 150-byte fragments at 80 ms; the SeedSigner shell
   displays 30-byte fragments at its default density (10 low, 120 high).
 
