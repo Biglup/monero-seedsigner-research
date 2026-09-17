@@ -21,47 +21,70 @@ scan times (stage 2), the SeedSigner UI integration, mainnet, FCMP++.
 
 All numbers from the Raspberry Pi Zero Rev 1.3 (BCM2835, ARMv6, 437132 kB MemTotal,
 kernel 6.18.50+rpt-rpi-v6), static `arm-unknown-linux-musleabihf` release build of
-spike-bench, 20 measured iterations after one warmup. Raw outputs in
-`xmr-signer/dist/pi-spike-bench-*.txt`. QR frames are UR fountain sequence lengths
-(minimum frames to display) at the SeedSigner shell's default 30 bytes per fragment;
-the value at 120 bytes (SeedSigner "high" density) is in parentheses. Feather uses
-150 bytes per fragment when it displays.
+spike-bench, 20 measured iterations after one warmup. Raw outputs, including the
+per-phase min / mean / max, in `xmr-signer/dist/pi-spike-bench-snap{50,200,500}.txt`.
+Wallet sizes: 51, 215 and 521 received outputs; balance about 0.09 XMR throughout
+(stagenet). QR frames are UR fountain sequence lengths, the minimum frames to
+display, at the SeedSigner shell's default 30 bytes per fragment, with the value at
+120 bytes per fragment (SeedSigner "high" density) in parentheses. Feather displays
+at 150 bytes per fragment. Peak RSS is for the whole spike-bench process.
+
+Note on the 51-output export: 33 of those outputs come from transactions paying 15
+subaddresses each and carry 16 additional tx public keys apiece (about 580 bytes per
+output). The 215 and 521 snapshots were built with plain payments, about 80 bytes per
+output, so their per-output cost is the representative one.
 
 | Wallet outputs | Outputs export bytes | QR frames | Key image export bytes | QR frames | Unsigned tx bytes (2 in) | QR frames | Signed tx bytes | QR frames |
 |---|---|---|---|---|---|---|---|---|
-| 51 (0.093 XMR) | 20545 | 685 (172) | 5060 | 169 (43) | 4275 | 143 (36) | 6803 | 227 (57) |
-| ~200 | pending | | | | | | | |
-| ~500 | pending | | | | | | | |
+| 51 | 20545 | 685 (172) | 5060 | 169 (43) | 4275 | 143 (36) | 6803 | 227 (57) |
+| 215 | 33381 | 1113 (279) | 20804 | 694 (174) | 4120 | 138 (35) | 6666 | 223 (56) |
+| 521 | 57296 | 1910 (478) | 50180 | 1673 (419) | 4198 | 141 (36) | 6739 | 225 (57) |
 
-16-input transaction at 51 outputs: unsigned 21790 bytes, 727 (182) frames; signed
-34673 bytes, 1156 (289) frames.
+16-input transaction per snapshot:
+
+| Wallet outputs | Unsigned tx bytes (16 in) | QR frames | Signed tx bytes | QR frames |
+|---|---|---|---|---|
+| 51 | 21790 | 727 (182) | 34673 | 1156 (289) |
+| 215 | 21635 | 722 (181) | 34573 | 1153 (289) |
+| 521 | 22082 | 737 (185) | 35151 | 1172 (293) |
 
 | Operation (Pi Zero 1.3) | Median ms (20 runs) | Peak RSS MB |
 |---|---|---|
-| Parse outputs export (51 outputs) | 743 | 4.0 (whole run) |
-| Compute key images (51 outputs) | 1658 | |
-| Parse unsigned tx (2 inputs) | 739 | |
-| Sign (2 inputs) | 4508 | |
-| Sign (16 inputs) | 10054 | |
-| Parse outputs export (500 outputs) | pending | |
-| Compute key images (500 outputs) | pending | |
+| Parse outputs export (51 outputs) | 743 | 3.9 |
+| Compute key images (51 outputs) | 1658 | 3.9 |
+| Parse unsigned tx (2 inputs, 51-output wallet) | 739 | 3.9 |
+| Sign (2 inputs, 51-output wallet) | 4508 | 3.9 |
+| Sign (16 inputs, 51-output wallet) | 10054 | 3.9 |
+| Parse outputs export (215 outputs) | 747 | 4.0 |
+| Compute key images (215 outputs) | 4199 | 4.0 |
+| Parse unsigned tx (2 inputs, 215-output wallet) | 739 | 4.0 |
+| Sign (2 inputs, 215-output wallet) | 4463 | 4.0 |
+| Sign (16 inputs, 215-output wallet) | 10000 | 4.0 |
+| Parse outputs export (521 outputs) | 754 | 3.9 |
+| Compute key images (521 outputs) | 8931 | 3.9 |
+| Parse unsigned tx (2 inputs, 521-output wallet) | 741 | 3.9 |
+| Sign (2 inputs, 521-output wallet) | 4470 | 3.9 |
+| Sign (16 inputs, 521-output wallet) | 9035 | 3.9 |
 
-Each parse row includes one CryptoNight hash (about 700 ms of it) for the payload
-decryption; each sign row includes another for the reply encryption.
+Signing time does not depend on wallet size; key image time is linear in outputs at
+about 16 ms per output plus one 0.7 s CryptoNight for the reply. Each parse row is
+dominated by the CryptoNight hash of the payload decryption; each sign row includes
+another for the reply encryption.
 
 | Camera round trip (stage 2) | Seconds |
 |---|---|
-| Scan outputs export (500 outputs) | pending |
-| Scan unsigned tx (16 inputs) | pending |
-| Feather scans key images | pending |
-| Feather scans signed tx | pending |
-| Power on to signed tx (2 inputs, SeedQR + passphrase) | pending |
+| Scan outputs export (500 outputs) | stage 2, not yet measured |
+| Scan unsigned tx (16 inputs) | stage 2, not yet measured |
+| Feather scans key images | stage 2, not yet measured |
+| Feather scans signed tx | stage 2, not yet measured |
+| Power on to signed tx (2 inputs, SeedQR + passphrase) | stage 2, not yet measured |
 
 Versions: monero-oxide 731657ae3385be667abb556266369a497bc86f13; Feather 2.8.1
 (mac-arm64, GPG-verified); monero-wallet-rpc/cli 0.18.5.1; Pi image Raspberry Pi
 OS Lite 2026-09-15 (trixie, armhf), kernel 6.18.50+rpt-rpi-v6; rustc 1.96.0,
 cargo-zigbuild 0.23.0, zig 0.15.2; cuprate-cryptonight at Cuprate/cuprate
-4f8fcd1bf468f566fcd89c460d50de4adb6825bf. Cupcake/Cake: not tested.
+4f8fcd1bf468f566fcd89c460d50de4adb6825bf. Cupcake/Cake: not tested (compatible by
+code inspection, see findings).
 
 ## 3. Findings
 
@@ -210,4 +233,5 @@ settled upstream.
 
 ## 6. Links
 
-Repo: this directory. Video: pending.
+Repo: this directory (to be published at github.com/Biglup/monero-seedsigner-research).
+Video: stage 2, not yet recorded.

@@ -12,3 +12,15 @@ iterations: 20 measured after 1 warmup, per phase
 fixtures: fixtures
 
 snapshot phase              min_us  median_us    mean_us     max_us
+snap500  parse_outputs      752416     753834     755469     789637
+snap500  key_images        8927218    8930914    8944292    9011884
+snap500  parse_2in          739264     740641     742499     776762
+snap500  sign_2in          4458271    4470464    4474289    4507971
+snap500  parse_16in         744295     745236     747174     781068
+snap500  sign_16in         9022536    9035043    9040497    9071864
+
+snap500 wallet_outputs=521 outputs_export_bytes=57296 keyimage_export_bytes=50180 outputs_frames@30=1910 keyimages_frames@30=1673 outputs_frames@120=478 keyimages_frames@120=419 outputs_frames@150=382 keyimages_frames@150=335
+snap500 tx_inputs=2 unsigned_tx_bytes=4198 signed_tx_bytes=6739 unsigned_frames@30=141 signed_frames@30=225 unsigned_frames@120=36 signed_frames@120=57 unsigned_frames@150=29 signed_frames@150=45
+snap500 tx_inputs=16 unsigned_tx_bytes=22082 signed_tx_bytes=35151 unsigned_frames@30=737 signed_frames@30=1172 unsigned_frames@120=185 signed_frames@120=293 unsigned_frames@150=148 signed_frames@150=235
+peak rss: 3976 kilobytes
+RESULT target=arm-unknown-linux-musleabihf iters=20 snap500.parse_outputs_median_us=753834 snap500.key_images_median_us=8930914 snap500.parse_2in_median_us=740641 snap500.sign_2in_median_us=4470464 snap500.parse_16in_median_us=745236 snap500.sign_16in_median_us=9035043 peak_rss_raw=3976 peak_rss_unit=kilobytes

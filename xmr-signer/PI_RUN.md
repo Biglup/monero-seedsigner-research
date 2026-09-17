@@ -118,3 +118,13 @@ XMR_SEED='word1 ... word25' ./spike-bench-armv6 fixtures --iters 20
 The run takes a few minutes per snapshot (the 16-input signing alone is about
 10 s per iteration). Raw on-device outputs are committed as
 `dist/pi-spike-bench-*.txt`.
+
+### Results (2026-09-17)
+
+| Snapshot | parse_outputs | key_images | parse_2in | sign_2in | parse_16in | sign_16in | peak RSS |
+|---|---|---|---|---|---|---|---|
+| 51 outputs | 743 ms | 1658 ms | 739 ms | 4508 ms | 744 ms | 10054 ms | 4028 kB |
+| 215 outputs | 747 ms | 4199 ms | 739 ms | 4463 ms | 744 ms | 10000 ms | 4084 kB |
+| 521 outputs | 754 ms | 8931 ms | 741 ms | 4470 ms | 745 ms | 9035 ms | 3976 kB |
+
+Medians of 20 iterations; raw files `dist/pi-spike-bench-snap{50,200,500}.txt`.
