@@ -2,7 +2,7 @@
 
 Feasibility spike: a SeedSigner class device (Raspberry Pi Zero 1.3, one ARMv6 core, 512 MB, no wireless, nothing persisted) as a Monero cold signer for an unmodified Feather Wallet. Stagenet only. This covers the signing core and the numbers, not the camera round trip or the device UI.
 
-## Round trip
+## Data Exchange
 
 Feather's offline signing wizard exchanges four payloads with a cold signer. They are wallet2's own cold signing blobs, encrypted to the view key, wrapped as a CBOR byte string in the Keystone `xmr-*` UR types. Nothing else is in there, the spec from Feather's source is in [xmr-signer/FORMATS.md](xmr-signer/FORMATS.md).
 
